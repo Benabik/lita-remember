@@ -54,8 +54,12 @@ module Lita
 
       def forget(response)
         term = response.match_data['term']
-        delete(term)
-        response.reply(format_deletion(term))
+        if known? term
+          delete(term)
+          response.reply(format_deletion(term))
+        else
+          response.reply format_delete_unknown(term)
+        end
       end
 
       def remember(response)
@@ -115,6 +119,10 @@ module Lita
 
       def format_deletion(term)
         t('response.forget', term: term)
+      end
+
+      def format_delete_unknown(term)
+        t('response.forget_nothing', term: term)
       end
 
       def format_confirmation(term, definition)

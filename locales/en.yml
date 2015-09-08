@@ -24,5 +24,6 @@ en:
           confirm: "OK, I'll remember %{term} is %{definition}"
           all: "These are all the terms I remember:\n - %{terms}"
           forget: "What is this %{term} you speak of? ;)"
+          forget_nothing: "I didn't know what %{term} is anyway."
           empty_search_result: "No matching %{type} found."
           search: "The following terms matched your query:\n - %{terms}"
