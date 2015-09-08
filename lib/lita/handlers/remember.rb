@@ -2,7 +2,7 @@ module Lita
   module Handlers
     class Remember < Handler
       route(
-        /^[Ww]hat(?:\s+(is|are))?\s+(?<term>.*?)\s*$/,
+        /^[Ww]hat(?:\s+(is|are))?\s+(?<term>.*?)\s*(\?\s*)?$/,
         :lookup,
         command: true,
         help: {
@@ -47,7 +47,7 @@ module Lita
       )
 
       def lookup(response)
-        term = response.match_data['term'].chomp('?')
+        term = response.match_data['term']
         return response.reply(t('response.unknown', term: term)) unless known?(term)
         response.reply(format_definition(term, definition(term)))
       end
