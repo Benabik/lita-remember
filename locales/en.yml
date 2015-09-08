@@ -23,6 +23,7 @@ en:
           unknown: "I don't know what %{term} is, type: remember %{term} is <definition> to set it.  Search for terms/definitions using: search (terms|definitions) for <string>"
           confirm: "OK, I'll remember %{term} is %{definition}"
           all: "These are all the terms I remember:\n - %{terms}"
+          already_know: "But I already know %{term} is %{definition}"
           forget: "What is this %{term} you speak of? ;)"
           forget_nothing: "I didn't know what %{term} is anyway."
           empty_search_result: "No matching %{type} found."

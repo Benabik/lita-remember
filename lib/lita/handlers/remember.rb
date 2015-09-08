@@ -23,6 +23,7 @@ module Lita
         /^[Ff]orget(\s+about)?\s+(?<term>.+?)\s*$/,
         :forget,
         command: true,
+        restrict_to: [:admins, :remember_admins],
         help: {
           t('help.forget.syntax') => t('help.forget.desc')
         }
@@ -65,8 +66,12 @@ module Lita
       def remember(response)
         term = response.match_data['term']
         info = response.match_data['definition']
-        write(term, info, response.user.id)
-        response.reply(format_confirmation(term, definition(term)))
+        if known?(term) and not is_admin?(response.user)
+          response.reply format_known(term, definition(term))
+        else
+          write(term, info, response.user.id)
+          response.reply(format_confirmation(term, definition(term)))
+        end
       end
 
       def search(response)
@@ -134,6 +139,10 @@ module Lita
         t('response.is', term: term, definition: definition[:term], count: definition[:hits], user: username)
       end
 
+      def format_known(term, definition)
+        t('response.already_know', term: term, definition: definition[:term])
+      end
+
       def known?(term)
         redis.exists(term.downcase)
       end
@@ -157,6 +166,11 @@ module Lita
         redis.hset(term.downcase, 'definition', definition)
         redis.hset(term.downcase, 'userid', userid)
         redis.hset(term.downcase, 'hits', 0)
+      end
+
+      def is_admin?(user)
+        a = robot.auth
+        a.user_is_admin?(user) or a.user_in_group?(user, :remember_admins)
       end
     end
     Lita.register_handler(Remember)
