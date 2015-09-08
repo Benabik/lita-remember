@@ -11,6 +11,15 @@ module Lita
       )
 
       route(
+        /^who\s+added\s+(?<term>.*?)\s*(\?\s*)?$/i,
+        :info,
+        command: true,
+        help: {
+          t('help.info.syntax') => t('help.info.desc')
+        }
+      )
+
+      route(
         /^remember\s+(?<term>.+?)\s+(is|are)\s+(?<definition>.+?)\s*$/i,
         :remember,
         command: true,
@@ -51,6 +60,12 @@ module Lita
         term = response.match_data['term']
         return response.reply(t('response.unknown', term: term)) unless known?(term)
         response.reply(format_definition(term, definition(term)))
+      end
+
+      def info(response)
+        term = response.match_data['term']
+        return response.reply(t('response.unknown', term: term)) unless known?(term)
+        response.reply(format_info(term, definition(term, false)))
       end
 
       def forget(response)
@@ -135,8 +150,12 @@ module Lita
       end
 
       def format_definition(term, definition)
+        t('response.is', term: term, definition: definition[:term])
+      end
+
+      def format_info(term, definition)
         username = Lita::User.find_by_id(definition[:userid]).name
-        t('response.is', term: term, definition: definition[:term], count: definition[:hits], user: username)
+        t('response.info', term: term, definition: definition[:term], count: definition[:hits], user: username)
       end
 
       def format_known(term, definition)
@@ -147,9 +166,9 @@ module Lita
         redis.exists(term.downcase)
       end
 
-      def definition(term)
+      def definition(term, hit = true)
         result = redis.hmget(term.downcase,'definition','hits', 'userid')
-        redis.hincrby(term.downcase, 'hits', 1)
+        redis.hincrby(term.downcase, 'hits', 1) if hit
         record = {
           :term       => result[0],
           :hits       => result[1],

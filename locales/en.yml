@@ -6,6 +6,9 @@ en:
           what:
             syntax: what is <term>?
             desc: returns the definition of <term>
+          info:
+            syntax: who added <term>?
+            desc: returns information about <term>
           remember:
             syntax: remember <term> is <definition>
             desc: store the definition of <term> as <definition>
@@ -19,7 +22,8 @@ en:
             syntax: what do you remember?
             desc: returns all the terms that have been memorized
         response:
-          is: "%{term} is %{definition} (answered %{count} times, defined by %{user})"
+          is: "%{term} is %{definition}"
+          info: "%{term} defined by %{user}, answered %{count} times"
           unknown: "I don't know what %{term} is, type: remember %{term} is <definition> to set it.  Search for terms/definitions using: search (terms|definitions) for <string>"
           confirm: "OK, I'll remember %{term} is %{definition}"
           all: "These are all the terms I remember:\n - %{terms}"
