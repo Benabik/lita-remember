@@ -2,7 +2,7 @@ module Lita
   module Handlers
     class Remember < Handler
       route(
-        /^[Ww]hat(?:\s+(is|are))?\s(?<term>.*)(\s+)?/,
+        /^[Ww]hat(?:\s+(is|are))?\s+(?<term>.*?)\s*$/,
         :lookup,
         command: true,
         help: {
@@ -11,7 +11,7 @@ module Lita
       )
 
       route(
-        /^[Rr]emember\s(?<term>.+?)\s(is|are)\s(?<definition>.+)$/,
+        /^[Rr]emember\s+(?<term>.+?)\s+(is|are)\s+(?<definition>.+?)\s*$/,
         :remember,
         command: true,
         help: {
@@ -20,7 +20,7 @@ module Lita
       )
 
       route(
-        /^[Ff]orget\s(about\s)?(?<term>.+)/,
+        /^[Ff]orget(\s+about)?\s+(?<term>.+?)\s*$/,
         :forget,
         command: true,
         help: {
@@ -29,7 +29,7 @@ module Lita
       )
 
       route(
-        /^[Ww]hat do you remember\??$/,
+        /^[Ww]hat\s+do\s+you\s+remember\s*(\?\s*)?$/,
         :all_the_terms,
         command: true,
         help: {
@@ -38,7 +38,7 @@ module Lita
       )
 
       route(
-        /^[Ss]earch (?<type>(terms|definitions)) for (?<query>.*)$/,
+        /^[Ss]earch\s+(?<type>(terms|definitions))\s+for\s+(?<query>.*?)\s*$/,
         :search,
         command: true,
         help: {
