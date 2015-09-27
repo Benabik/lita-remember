@@ -144,14 +144,14 @@ module Lita
 
       def search(response)
         type  = response.match_data['type']
-        query = response.match_data['query']
+        query = response.match_data['query'].downcase
         matching_terms = []
         if type == 'terms'
           terms = fetch_all_terms
           matching_terms = terms.select { |term| term.include?(query) }
         else
           fetch_all.each { |term,definition|
-            matching_terms.push(term) if definition.include?(query)
+            matching_terms.push(term) if definition.downcase.include?(query)
           }
         end
         if matching_terms.empty?
