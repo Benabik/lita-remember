@@ -11,6 +11,12 @@ module Lita
       )
 
       route(
+        /^what('s|\s+(is|are))?\s+(?<term>.*?)\s*(\?\s*)?$/i,
+        :lookup_quiet,
+        command: false,
+      )
+
+      route(
         /^who\s+added\s+(?<term>.*?)\s*(\?\s*)?$/i,
         :info,
         command: true,
@@ -60,6 +66,12 @@ module Lita
         term = response.match_data['term']
         return response.reply(t('response.unknown', term: term)) unless known?(term)
         response.reply(format_definition(term, definition(term)))
+      end
+
+      def lookup_quiet(response)
+        return if response.message.command?
+        term = response.match_data['term']
+        response.reply(format_definition(term, definition(term))) if known?(term)
       end
 
       def info(response)
