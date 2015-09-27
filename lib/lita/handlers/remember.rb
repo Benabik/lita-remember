@@ -157,12 +157,29 @@ module Lita
         if matching_terms.empty?
           response.reply(t('response.empty_search_result', type: type))
         else
-          response.reply(format_search(matching_terms.sort.join("\n - ")))
+          matching_terms.sort!
+          reply = matching_terms.join "\n - "
+
+          if matching_terms.length > 5 and not response.message.private_message?
+            response.reply t('response.long_reply', count: matching_terms.length)
+            response.reply_privately format_search(reply)
+          else
+            response.reply format_search(reply)
+          end
         end
       end
 
       def all_the_terms(response)
-        response.reply(format_all_the_terms(fetch_all_terms.sort.join("\n - ")))
+        terms = fetch_all_terms
+        terms.sort!
+        reply = terms.join "\n - "
+
+        if terms.length > 5 and not response.message.private_message?
+          response.reply t('response.long_reply', count: terms.length)
+          response.reply_privately format_all_the_terms(reply)
+        else
+          response.reply format_all_the_terms(reply)
+        end
       end
 
       def fetch_all()
