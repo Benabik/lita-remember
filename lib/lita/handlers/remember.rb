@@ -17,7 +17,7 @@ module Lita
       )
 
       route(
-        /^show\s+me\s+(?<term>.*?)\s*(\.\s*)?$/i,
+        /^show\s+me\s+(?!list\s*$)(?<term>.*?)\s*(\.\s*)?$/i,
         :lookup,
         command: true,
         help: {
@@ -26,9 +26,14 @@ module Lita
       )
 
       route(
-        /^show\s+me\s+(?<term>.*?)\s*(\.\s*)?$/i,
+        /^show\s+me\s+(?!list\s*$)(?<term>.*?)\s*(\.\s*)?$/i,
         :lookup_quiet,
         command: false,
+      )
+
+      route(
+        /^\s*show\s+me\s+list\s*$/i,
+        :all_the_terms
       )
 
       route(
