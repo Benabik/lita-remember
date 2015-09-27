@@ -12,6 +12,9 @@ en:
           remember:
             syntax: remember <term> is <definition>
             desc: store the definition of <term> as <definition>
+          synonym:
+            syntax: <term> is also <term>
+            desc: Mark two terms as synonyms
           search:
             syntax: search (terms|definitions) for <query>
             desc: searches memory for your query
@@ -24,6 +27,7 @@ en:
         response:
           is: "%{term} is %{definition}"
           info: "%{term} defined by %{user}, answered %{count} times"
+          info_syn: "%{term} defined by %{user} as synonym of %{synonym}, answered %{count} times"
           unknown: "I don't know what %{term} is, type: remember %{term} is <definition> to set it.  Search for terms/definitions using: search (terms|definitions) for <string>"
           confirm: "OK, I'll remember %{term} is %{definition}"
           all: "These are all the terms I remember:\n - %{terms}"
@@ -32,3 +36,6 @@ en:
           forget_nothing: "I didn't know what %{term} is anyway."
           empty_search_result: "No matching %{type} found."
           search: "The following terms matched your query:\n - %{terms}"
+          synonym: "%{new} now means %{original}"
+          syn_known: "But I already know both %{term1} and %{term2}"
+          syn_unknown: "I don't know %{term1} nor %{term2}.  Define one first using remember %{term1} is <definition>."

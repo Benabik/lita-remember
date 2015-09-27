@@ -50,6 +50,15 @@ module Lita
       )
 
       route(
+        /^(?<term1>.+?)\s+(is|are)\s+also\s+(?<term2>.+?)\s*$/i,
+        :synonym,
+        command: true,
+        help: {
+          t('help.synonym.syntax') => t('help.synonym.desc')
+        }
+      )
+
+      route(
         /^forget(\s+about)?\s+(?<term>.+?)\s*$/i,
         :forget,
         command: true,
@@ -116,6 +125,23 @@ module Lita
         end
       end
 
+      def synonym(response)
+        term1 = response.match_data['term1']
+        term2 = response.match_data['term2']
+
+        if known? term1
+          return response.reply(format_syn_known(term1, term2)) if known? term2
+          new, original = term2, term1
+        elsif known? term2
+          new, original = term1, term2
+        else
+          return response.reply format_syn_unknown(term2, term2)
+        end
+
+        write_syn new, original, response.user.id
+        response.reply format_synonym(new, original)
+      end
+
       def search(response)
         type  = response.match_data['type']
         query = response.match_data['query']
@@ -142,8 +168,8 @@ module Lita
       def fetch_all()
         results = {}
         redis.scan_each(:count => 1000) { |term|
-          definition = redis.hmget(term,'definition')[0]
-          results[term] = definition
+          definition = redis.hget term, 'definition'
+          results[term] = definition unless definition.nil?
         }
         return results
       end
@@ -173,16 +199,34 @@ module Lita
       end
 
       def format_confirmation(term, definition)
-        t('response.confirm', term: term, definition: definition[:term])
+        t('response.confirm', term: term, definition: definition[:definition])
       end
 
       def format_definition(term, definition)
-        t('response.is', term: term, definition: definition[:term])
+        t('response.is', term: term, definition: definition[:definition])
       end
 
       def format_info(term, definition)
         username = Lita::User.find_by_id(definition[:userid]).name
-        t('response.info', term: term, definition: definition[:term], count: definition[:hits], user: username)
+        if definition[:term] != term
+          t 'response.info_syn', term: term, synonym: definition[:term],
+            count: definition[:hits], user: username
+        else
+          t'response.info', term: term, definition: definition[:definition],
+            count: definition[:hits], user: username
+        end
+      end
+
+      def format_synonym(new, original)
+        t 'response.synonym', new: new, original: original
+      end
+
+      def format_syn_known(term1, term2)
+        t 'response.syn_known', term1: term1, term2: term2
+      end
+
+      def format_syn_unknown(term1, term2)
+        t 'response.syn_unknown', term1: term1, term2: term2
       end
 
       def format_known(term, definition)
@@ -194,14 +238,23 @@ module Lita
       end
 
       def definition(term, hit = true)
-        result = redis.hmget(term.downcase,'definition','hits', 'userid')
-        redis.hincrby(term.downcase, 'hits', 1) if hit
+        term = term.downcase
+
+        redis.hincrby term, 'hits', 1 if hit
+
+        result = redis.hmget term, 'hits', 'userid'
         record = {
-          :term       => result[0],
-          :hits       => result[1],
-          :userid     => result[2],
+          :hits   => result[0],
+          :userid => result[1],
         }
-        return record
+
+        until (synonym = redis.hget term, 'synonym').nil?
+          term = synonym
+        end
+        record[:term] = term
+        record[:definition] = redis.hget term, 'definition'
+
+        record
       end
 
       def delete(term)
@@ -212,6 +265,14 @@ module Lita
         redis.hset(term.downcase, 'definition', definition)
         redis.hset(term.downcase, 'userid', userid)
         redis.hset(term.downcase, 'hits', 0)
+      end
+
+      def write_syn(new, original, userid)
+        new = new.downcase
+        original = original.downcase
+        redis.hset new, 'synonym', original
+        redis.hset new, 'userid', userid
+        redis.hset new, 'hits', 0
       end
 
       def is_admin?(user)
