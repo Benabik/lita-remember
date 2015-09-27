@@ -229,7 +229,7 @@ module Lita
       end
 
       def format_info(term, definition)
-        username = Lita::User.find_by_id(definition[:userid]).name
+        username = Lita::User.find_by_id(definition[:userid]).mention_name
         if definition[:term] != term
           t 'response.info_syn', term: term, synonym: definition[:term],
             count: definition[:hits], user: username
