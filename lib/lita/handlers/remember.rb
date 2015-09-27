@@ -93,20 +93,23 @@ module Lita
 
       def lookup(response)
         term = response.match_data['term']
-        return response.reply(t('response.unknown', term: term)) unless known?(term)
-        response.reply(format_definition(term, definition(term)))
+        record = definition term
+        return response.reply(t('response.unknown', term: term)) unless record
+        response.reply format_definition(term, record)
       end
 
       def lookup_quiet(response)
         return if response.message.command?
         term = response.match_data['term']
-        response.reply(format_definition(term, definition(term))) if known?(term)
+        record = definition term
+        response.reply format_definition(term, record) if record
       end
 
       def info(response)
         term = response.match_data['term']
-        return response.reply(t('response.unknown', term: term)) unless known?(term)
-        response.reply(format_info(term, definition(term, false)))
+        record = definition term, false
+        return response.reply(t('response.unknown', term: term)) unless record
+        response.reply format_info(term, record)
       end
 
       def forget(response)
@@ -122,11 +125,12 @@ module Lita
       def remember(response)
         term = response.match_data['term']
         info = response.match_data['definition']
-        if known?(term) and not is_admin?(response.user)
-          response.reply format_known(term, definition(term))
+        record = definition term, false
+        if record and not is_admin?(response.user)
+          response.reply format_known(term, record)
         else
           write(term, info, response.user.id)
-          response.reply(format_confirmation(term, definition(term)))
+          response.reply(format_confirmation(term, definition(term, false)))
         end
       end
 
@@ -262,6 +266,8 @@ module Lita
       def definition(term, hit = true)
         term = term.downcase
 
+        return nil unless known? term
+
         redis.hincrby term, 'hits', 1 if hit
 
         result = redis.hmget term, 'hits', 'userid'
@@ -270,11 +276,18 @@ module Lita
           :userid => result[1],
         }
 
+        synonyms = []
         until (synonym = redis.hget term, 'synonym').nil?
+          synonyms << term
           term = synonym
         end
         record[:term] = term
+
         record[:definition] = redis.hget term, 'definition'
+        unless record[:definition]
+          synonyms.each {|syn| delete syn}
+          return nil
+        end
 
         record
       end
