@@ -17,6 +17,21 @@ module Lita
       )
 
       route(
+        /^show\s+me\s+(?<term>.*?)\s*(\.\s*)?$/i,
+        :lookup,
+        command: true,
+        help: {
+          'show me <term>' => t('help.what.desc')
+        }
+      )
+
+      route(
+        /^show\s+me\s+(?<term>.*?)\s*(\.\s*)?$/i,
+        :lookup_quiet,
+        command: false,
+      )
+
+      route(
         /^who\s+added\s+(?<term>.*?)\s*(\?\s*)?$/i,
         :info,
         command: true,
