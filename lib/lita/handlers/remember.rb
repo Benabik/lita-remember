@@ -2,7 +2,7 @@ module Lita
   module Handlers
     class Remember < Handler
       route(
-        /^what(?:\s+(is|are))?\s+(?<term>.*?)\s*(\?\s*)?$/i,
+        /^what('s|\s+(is|are))?\s+(?<term>.*?)\s*(\?\s*)?$/i,
         :lookup,
         command: true,
         help: {
