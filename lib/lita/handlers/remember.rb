@@ -2,7 +2,7 @@ module Lita
   module Handlers
     class Remember < Handler
       route(
-        /^what(?!\s+do\s+you\s+remember(\s*\?)?\s*$)('s|\s+(is|are))?\s+(?<term>.*?)\s*(\?\s*)?$/i,
+        /^what(?!\s+do\s+you\s+remember(\s*\?)?\s*$)('s|\s+(is|are))?(\s+(a|the))?\s+(?<term>.*?)\s*(\?\s*)?$/i,
         :lookup,
         command: true,
         help: {
@@ -11,13 +11,13 @@ module Lita
       )
 
       route(
-        /^what('s|\s+(is|are))?\s+(?<term>.*?)\s*(\?\s*)?$/i,
+        /^what('s|\s+(is|are))?(\s+(a|the))?\s+(?<term>.*?)\s*(\?\s*)?$/i,
         :lookup_quiet,
         command: false,
       )
 
       route(
-        /^show\s+me\s+(?!list\s*$)(?<term>.*?)\s*(\.\s*)?$/i,
+        /^show\s+me\s+(?!list\s*$)((a|the)\s+)?(?<term>.*?)\s*(\.\s*)?$/i,
         :lookup,
         command: true,
         help: {
@@ -26,7 +26,7 @@ module Lita
       )
 
       route(
-        /^show\s+me\s+(?!list\s*$)(?<term>.*?)\s*(\.\s*)?$/i,
+        /^show\s+me\s+(?!list\s*$)((a|the)\s+)?(?<term>.*?)\s*(\.\s*)?$/i,
         :lookup_quiet,
         command: false,
       )
@@ -46,7 +46,7 @@ module Lita
       )
 
       route(
-        /^remember\s+(?<term>.+?)\s+(is|are)\s+(?<definition>.+?)\s*$/i,
+        /^remember(\s+(a|the))?\s+(?<term>.+?)\s+(is|are)\s+(?<definition>.+?)\s*$/i,
         :remember,
         command: true,
         help: {
@@ -55,7 +55,7 @@ module Lita
       )
 
       route(
-        /^(?<term1>.+?)\s+(is|are)\s+also\s+(?<term2>.+?)\s*$/i,
+        /^((a|the)\s+)?(?<term1>.+?)\s+(is|are)\s+also(\s+(a|the))?\s+(?<term2>.+?)\s*$/i,
         :synonym,
         command: true,
         help: {
