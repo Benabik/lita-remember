@@ -184,6 +184,7 @@ module Lita
         if count < 24 or response.message.private_message?
           response.reply format_all_the_terms terms
         else
+          terms.delete_if { |t| redis.hexists t, 'synonym' }
           terms.sort_by! { |t| -redis.hget(t, 'hits').to_i }
           terms = terms.take 24
           response.reply format_too_many(terms, count)
