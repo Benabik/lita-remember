@@ -32,7 +32,7 @@ module Lita
       )
 
       route(
-        /^\s*show\s+me\s+list\s*$/i,
+        /\bshow\s+me\s+list\b/i,
         :all_the_terms
       )
 
@@ -180,14 +180,13 @@ module Lita
 
       def all_the_terms(response)
         terms = fetch_all_terms
-        terms.sort!
-        reply = terms.join "\n - "
-
-        if terms.length > 5 and not response.message.private_message?
-          response.reply t('response.long_reply', count: terms.length)
-          response.reply_privately format_all_the_terms(reply)
+        count = terms.length
+        if count < 24 or response.message.private_message?
+          response.reply format_all_the_terms terms
         else
-          response.reply format_all_the_terms(reply)
+          terms.sort_by! { |t| -redis.hget(t, 'hits').to_i }
+          terms = terms.take 24
+          response.reply format_too_many(terms, count)
         end
       end
 
@@ -209,7 +208,12 @@ module Lita
       private
 
       def format_all_the_terms(terms)
-        t('response.all', terms: terms)
+        terms.sort!
+        t('response.all', terms: terms.join("\n - "))
+      end
+
+      def format_too_many(terms, count)
+        t('response.too_many', terms: terms.join(', '), count: count)
       end
 
       def format_search(terms)
