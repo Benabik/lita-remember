@@ -281,11 +281,13 @@ module Lita
         }
 
         synonyms = []
+        orig = term
         until (synonym = redis.hget term, 'synonym').nil?
           synonyms << term
           term = synonym
         end
         record[:term] = term
+        redis.hincrby term, 'hits', 1 if hit and term != orig
 
         record[:definition] = redis.hget term, 'definition'
         unless record[:definition]
